@@ -51,8 +51,34 @@ def check_password_strength(password):
     Hint: Use .isdigit(), .isupper(), .islower() and string.punctuation
     """
     # TODO: Implement this function
-    pass
+    score = 0
+    length = len(password)
+    has_number = False
+    has_uppercase = False
+    has_lowercase = False
+    has_special_char = False
+    for c in password:
+        if not has_number and c.isdigit():
+            has_number = True
+            score += 20
+        if not has_uppercase and c.isupper():
+            has_uppercase = True
+            score += 20
+        if not has_lowercase and c.islower():
+            has_lowercase = True
+            score += 20
+        if not has_special_char and c in string.punctuation:
+            has_special_char = True
+            score += 20
 
+    score += 30 if length >= 12 else (20 if length >= 8 else 0)
+    score += 10 if password not in COMMON_PASSWORDS else 0
+    strength = "Weak" if 0 <= score <= 39 else ("Medium" if 40 <= score <= 69 else "Strong")
+    return {
+        "password": password,
+        "score": score,
+        "strength": strength
+    }
 
 # ============================================
 # TODO 2: Password Generator
@@ -83,7 +109,24 @@ def generate_password(length=12, use_special=True):
           string.digits, and random.choice()
     """
     # TODO: Implement this function
-    pass
+    length = max(length, 8)
+    available_indexes = list(range(length))
+    random.shuffle(available_indexes)
+    requirements = {string.ascii_uppercase, string.ascii_lowercase, string.digits}
+    if use_special:
+        requirements.add(string.punctuation)
+    
+    requirements_len = len(requirements)
+    requirements_lst = list(requirements.copy())
+
+    password_lst = [""] * length
+    for idx in available_indexes[:requirements_len]:
+        req = requirements.pop()
+        password_lst[idx] = random.choice(req)
+    for idx in available_indexes[requirements_len:]:
+        password_lst[idx] = random.choice(random.choice(requirements_lst))
+
+    return "".join(password_lst)
 
 
 # ============================================
@@ -109,7 +152,7 @@ if __name__ == "__main__":
             print("❌ TODO 1 should return a dictionary")
             exit()
         
-        required_keys = ["password", "score", "strength", "feedback"]
+        required_keys = ["password", "score", "strength"]
         missing_keys = [key for key in required_keys if key not in result]
         
         if missing_keys:
